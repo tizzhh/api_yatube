@@ -1,5 +1,3 @@
-from typing import Callable
-
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.response import Response
@@ -8,7 +6,11 @@ from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 from posts.models import Comment, Group, Post
 
 
-def check_is_request_user_author(func: Callable):
+# Появился такой вопрос: нужны ли аннотации для request,
+# serializer, различных методов и т.п здесь?
+# В процессе аннотирования я понял, что мне приходится
+# делать импорты только ради аннотации, что выглядит бредово :(
+def check_is_request_user_author(func):
     def wrapper(self, request, *args, **kwargs):
         # каждый раз обращаться к бд - не очень оптимизированно,
         # наверное, но лучшего решения как-то не придумал...
