@@ -1,28 +1,22 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework import viewsets
+from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 from posts.models import Comment, Group, Post
 
 
-# Появился такой вопрос: нужны ли аннотации для request,
-# serializer, различных методов и т.п здесь?
-# В процессе аннотирования я понял, что мне приходится
-# делать импорты только ради аннотации, что выглядит бредово :(
-def check_is_request_user_author(func):
-    def wrapper(self, request, *args, **kwargs):
-        # каждый раз обращаться к бд - не очень оптимизированно,
-        # наверное, но лучшего решения как-то не придумал...
-        if request.user != self.get_object().author:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return func(self, request, *args, **kwargs)
+class IsRequestUserOwnerOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return True
 
-    return wrapper
+        return request.user == obj.author
 
 
 class CommentSerializer(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsRequestUserOwnerOrReadOnly]
 
     def get_queryset(self):
         return Comment.objects.filter(post=self.kwargs.get('post_pk'))
@@ -30,14 +24,6 @@ class CommentSerializer(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
         serializer.save(post=post, author=post.author)
-
-    @check_is_request_user_author
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @check_is_request_user_author
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
 
 
 class GroupView(viewsets.ReadOnlyModelViewSet):
@@ -48,14 +34,7 @@ class GroupView(viewsets.ReadOnlyModelViewSet):
 class PostView(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated, IsRequestUserOwnerOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    @check_is_request_user_author
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @check_is_request_user_author
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)

@@ -4,6 +4,9 @@ from django.db import models
 User = get_user_model()
 
 
+POST_CHAR_LIMIT = 75
+
+
 class Group(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
@@ -29,7 +32,11 @@ class Post(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return (
+            (self.text[:POST_CHAR_LIMIT] + '...')
+            if len(self.text) > 75
+            else self.text
+        )
 
 
 class Comment(models.Model):

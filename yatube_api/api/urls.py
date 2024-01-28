@@ -4,14 +4,14 @@ from rest_framework.authtoken import views
 
 from .views import CommentSerializer, GroupView, PostView
 
-router = routers.DefaultRouter()
-router.register(r'posts', PostView)
-router.register(r'groups', GroupView)
-router.register(
+api_v1_router = routers.DefaultRouter()
+api_v1_router.register(r'posts', PostView, basename='posts')
+api_v1_router.register(r'groups', GroupView, basename='groups')
+api_v1_router.register(
     r'posts/(?P<post_pk>\d+)/comments', CommentSerializer, basename='comments'
 )
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('api-token-auth/', views.obtain_auth_token),
+    path('v1/', include(api_v1_router.urls)),
+    path('v1/api-token-auth/', views.obtain_auth_token),
 ]
