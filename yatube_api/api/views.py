@@ -6,6 +6,7 @@ from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 from posts.models import Comment, Group, Post
 
 
+# Сори, я забыл смержить ветки xD
 class IsRequestUserOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
