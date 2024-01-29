@@ -34,7 +34,7 @@ class Post(models.Model):
     def __str__(self):
         return (
             (self.text[:POST_CHAR_LIMIT] + '...')
-            if len(self.text) > 75
+            if len(self.text) > POST_CHAR_LIMIT
             else self.text
         )
 
