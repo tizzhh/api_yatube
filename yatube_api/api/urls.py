@@ -2,13 +2,13 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken import views
 
-from .views import CommentSerializer, GroupView, PostView
+from .views import CommentView, GroupView, PostView
 
 api_v1_router = routers.DefaultRouter()
 api_v1_router.register(r'posts', PostView, basename='posts')
 api_v1_router.register(r'groups', GroupView, basename='groups')
 api_v1_router.register(
-    r'posts/(?P<post_pk>\d+)/comments', CommentSerializer, basename='comments'
+    r'posts/(?P<post_pk>\d+)/comments', CommentView, basename='comments'
 )
 
 urlpatterns = [
